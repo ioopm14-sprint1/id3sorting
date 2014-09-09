@@ -100,10 +100,5 @@ int main(int argc, const char *argv[])
 {
     read_header("data/music10.mp3");
 
-   // int size = 0x00000000 | 0x2a | 0x01 << 7 | 0x00 << 14 | 0x00 << 21;
-   // printf("size: 0x%08x\n", size);
-
-
-    
     return 0;
 }
