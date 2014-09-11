@@ -12,7 +12,7 @@ struct ID3_Header* ID3_Header_new() {
 }
 void ID3_Header_free(struct ID3_Header* header) {
   free(header);
-} 
+}
 
 
 struct ID3_Frame {
@@ -29,11 +29,11 @@ struct ID3_Frame* ID3_Frame_new() {
 void ID3_Frame_free(struct ID3_Frame* frame) {
   free(frame->data);
   free(frame);
-} 
+}
 
 
 
-int decode_ID3_size(char *size_data) { 
+int decode_ID3_size(char *size_data) {
   return (0x00000000 | size_data[3] | size_data[2] << 7 | size_data[1] << 14 | size_data[0] << 21);
 }
 
@@ -56,10 +56,10 @@ struct ID3_Header* read_header(FILE *file) {
 
   header->version[0] = buffer[3];
   header->version[1] = buffer[4];
-  
-  
+
+
   header->flags = buffer[5];
-  
+
   header->size = decode_ID3_size(buffer+6);
     //0x00000000 | buffer[9] | buffer[8] << 7 | buffer[7] << 14 | buffer[6] << 21;
 
@@ -82,12 +82,12 @@ struct ID3_Frame* read_frame(FILE *file) {
   }
 
   struct ID3_Frame *frame = malloc(sizeof(struct ID3_Frame));
-  
+
   if (frame == NULL) {
     printf("Unable to allocate memory for frame\n");
     return NULL;
   }
-  
+
   frame->id[0] = buffer[0];
   frame->id[1] = buffer[1];
   frame->id[2] = buffer[2];
@@ -118,7 +118,7 @@ struct ID3_Frame* read_frame(FILE *file) {
 
 
 
-  /* 
+  /*
   printf("frame:\n");
   printf("id: %s\n", frame->id);
   printf("size: %d\n", frame->size);
@@ -127,7 +127,7 @@ struct ID3_Frame* read_frame(FILE *file) {
   printf("data: %s\n", frame->data);
   */
   return frame;
-}			     
+}
 
 int read_id3_data(char *filename) {
 
@@ -145,14 +145,14 @@ int read_id3_data(char *filename) {
       printf("Unable to read header\n");
       return 0;
     }
-     
+
     printf("header:\n");
     printf("version: 2.%d.%d\n", header->version[0], header->version[1]);
     printf("flags: %c\n", header->flags);
     printf("size: %d\n", header->size);
-     
+
     ID3_Header_free(header);
-    
+
     struct ID3_Frame *frame = NULL;
     int times = 0;
     while ((frame = read_frame(file)) && times < 20) {
