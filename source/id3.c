@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+//#include <inttypes.h>
+#include <stdint.h>
 
+
+// TODO: create typedefs for uint32_t etc.
 struct ID3_Header {
   char version[2];
   char flags;
@@ -33,12 +37,12 @@ void ID3_Frame_free(struct ID3_Frame* frame) {
 
 
 
-int decode_ID3_size(char *size_data) {
+int ID3_decode_size(char *size_data) {
   return (0x00000000 | size_data[3] | size_data[2] << 7 | size_data[1] << 14 | size_data[0] << 21);
 }
 
 
-struct ID3_Header* read_header(FILE *file) {
+struct ID3_Header* ID3_read_header(FILE *file) {
   char buffer[10];
   fread(&buffer, sizeof(char), 10, file);
 
@@ -60,7 +64,7 @@ struct ID3_Header* read_header(FILE *file) {
 
   header->flags = buffer[5];
 
-  header->size = decode_ID3_size(buffer+6);
+  header->size = ID3_decode_size(buffer+6);
     //0x00000000 | buffer[9] | buffer[8] << 7 | buffer[7] << 14 | buffer[6] << 21;
 
   /*
@@ -72,7 +76,7 @@ struct ID3_Header* read_header(FILE *file) {
   return header;
 }
 
-struct ID3_Frame* read_frame(FILE *file) {
+struct ID3_Frame* ID3_read_frame(FILE *file) {
   char buffer[10];
   fread(&buffer, sizeof(char), 10, file);
 
@@ -95,7 +99,7 @@ struct ID3_Frame* read_frame(FILE *file) {
   frame->id[4] = '\0';
 
 
-  frame->size = decode_ID3_size(buffer+4);
+  frame->size = ID3_decode_size(buffer+4);
     //0x00000000 | frame[7] | frame[6] << 7 | frame[5] << 14 | frame[4] << 21;
 
   frame->flags[0] = buffer[8];
@@ -129,7 +133,7 @@ struct ID3_Frame* read_frame(FILE *file) {
   return frame;
 }
 
-int read_id3_data(char *filename) {
+int ID3_read_file(char *filename) {
 
     FILE *file = fopen(filename, "rb");
 
@@ -139,7 +143,7 @@ int read_id3_data(char *filename) {
     }
 
 
-    struct ID3_Header *header = read_header(file);
+    struct ID3_Header *header = ID3_read_header(file);
 
     if (header == NULL) {
       printf("Unable to read header\n");
@@ -155,7 +159,7 @@ int read_id3_data(char *filename) {
 
     struct ID3_Frame *frame = NULL;
     int times = 0;
-    while ((frame = read_frame(file)) && times < 20) {
+    while ((frame = ID3_read_frame(file)) && times < 20) {
       printf("frame:\n");
       printf("id: %s\n", frame->id);
       printf("size: %d\n", frame->size);
@@ -172,10 +176,3 @@ int read_id3_data(char *filename) {
 }
 
 
-int main(int argc, const char *argv[])
-{
-    read_id3_data("../data/music10.mp3");
-
-
-    return 0;
-}
