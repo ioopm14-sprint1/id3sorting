@@ -15,8 +15,9 @@ struct ID3_header {
 struct ID3_header* ID3_header_new() {
     return (struct ID3_header*)malloc(sizeof(struct ID3_header));
 }
-void ID3_header_free(struct ID3_header* header) {
-    free(header);
+void ID3_header_free(struct ID3_header** header) {
+    free(*header);
+    *header = NULL;
 }
 
 void ID3_header_print(struct ID3_header* header) {
@@ -40,14 +41,15 @@ struct ID3_frame {
 struct ID3_frame* ID3_frame_new() {
     return (struct ID3_frame*)malloc(sizeof(struct ID3_frame));
 }
-void ID3_frame_free(struct ID3_frame* frame) {
+void ID3_frame_free(struct ID3_frame** frame) {
 
     // only free frame->data if it exist
-    if (frame->data) {
-        free(frame->data);
-        frame->data = NULL;
+    if ((*frame)->data) {
+        free((*frame)->data);
+        (*frame)->data = NULL;
     }
-    free(frame);
+    free(*frame);
+    *frame = NULL;
 }
 
 void ID3_frame_print(struct ID3_frame *frame) {
@@ -139,7 +141,7 @@ struct ID3_frame* ID3_read_frame(FILE *file) {
 
     if (frame->data == NULL) {
         printf("Unable to allocate memory for frame data\n");
-        ID3_frame_free(frame);
+        ID3_frame_free(&frame);
         return NULL;
     }
 
@@ -147,7 +149,6 @@ struct ID3_frame* ID3_read_frame(FILE *file) {
     frame->encoding = fgetc(file);
     frame->size--; // Skip encoding character
     fread(frame->data, sizeof(char), frame->size, file);
-
 
     return frame;
 }
@@ -175,11 +176,11 @@ int ID3_read_file(char *filename) {
     int times = 0;
     while ((frame = ID3_read_frame(file)) && times < 20) {
         ID3_frame_print(frame);
-        ID3_frame_free(frame);
+        ID3_frame_free(&frame);
         frame = NULL;
     }
 
-    ID3_header_free(header);
+    ID3_header_free(&header);
     header = NULL;
 
     fclose(file);
@@ -188,15 +189,55 @@ int ID3_read_file(char *filename) {
 }
 
 
+//===============================================================
+
+struct ID3_file {
+    FILE *file;
+    size_t size;
+};
 
 
+struct ID3_file* ID3_file_new() {
+    return (struct ID3_file*)malloc(sizeof(struct ID3_file));
+}
+void ID3_file_free(struct ID3_file** file) {
+    free(*file);
+    *file = NULL;
+}
 
-struct ID3_file* ID3_open(const char*file) {
-    return NULL;
+
+struct ID3_file* ID3_open(const char*filename) {
+
+    FILE *file = fopen(filename, "rb");
+
+    if (file == NULL) {
+        printf("Unable to open file: %s\n", filename);
+        return NULL;
+    }
+
+    struct ID3_header *header = ID3_read_header(file);
+
+    if (header == NULL) {
+        printf("Unable to read header\n");
+        return NULL;
+    }
+
+    struct ID3_file *id3_file = ID3_file_new();
+
+    if (id3_file == NULL) {
+        printf("Unable to allocate memory for ID3_file\n");
+        ID3_header_free(&header);
+        return NULL;
+    }
+
+    id3_file->file = file;
+    id3_file->size = header->size;
+
+    return id3_file;
 }
 
 void ID3_close(struct ID3_file *file) {
-
+    
 }
 
 struct ID3_data* ID3_read(struct ID3_file *file) {
