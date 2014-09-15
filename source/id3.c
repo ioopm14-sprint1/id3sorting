@@ -177,11 +177,9 @@ int ID3_read_file(char *filename) {
     while ((frame = ID3_read_frame(file)) && times < 20) {
         ID3_frame_print(frame);
         ID3_frame_free(&frame);
-        frame = NULL;
     }
 
     ID3_header_free(&header);
-    header = NULL;
 
     fclose(file);
 
@@ -192,9 +190,10 @@ int ID3_read_file(char *filename) {
 //===============================================================
 
 struct ID3_file {
-    FILE *file;
-    size_t size;
-};
+  FILE *file;
+  int size;
+  };
+
 
 
 struct ID3_file* ID3_file_new() {
@@ -205,6 +204,9 @@ void ID3_file_free(struct ID3_file** file) {
     *file = NULL;
 }
 
+struct ID3_data* ID3_data_new() {
+    return (struct ID3_data*)malloc(sizeof(struct ID3_data));
+}
 
 struct ID3_file* ID3_open(const char*filename) {
 
@@ -236,10 +238,54 @@ struct ID3_file* ID3_open(const char*filename) {
     return id3_file;
 }
 
-void ID3_close(struct ID3_file *file) {
-    
+void ID3_close(struct ID3_file **id3_file) {
+  if (*id3_file) {
+    fclose((*id3_file)->file);
+    ID3_file_free(id3_file);
+  }
 }
 
-struct ID3_data* ID3_read(struct ID3_file *file) {
+struct ID3_data* ID3_read(struct ID3_file *id3_file) {
+  if (id3_file == NULL) {
+    printf("Can't read from NULL file\n");
     return NULL;
+  }
+  
+  struct ID3_frame *frame = ID3_read_frame(id3_file->file);
+    if (frame == NULL) {
+      return NULL;
+    }
+  
+  struct ID3_data *id3_data = ID3_data_new();
+  if (id3_data == NULL) {
+    printf("Unable to allocate memory for ID3 data\n");
+    ID3_frame_free(&frame);
+    return NULL;
+  }
+  
+  id3_data->id[0] = frame->id[0];
+  id3_data->id[1] = frame->id[1];
+  id3_data->id[2] = frame->id[2];
+  id3_data->id[3] = frame->id[3];
+  id3_data->id[4] = '\0';
+  
+  id3_data->size = frame->size;
+
+  // FIXME: Transfer memory responsibility
+  id3_data->data = frame->data;
+  frame->data = NULL;
+  ID3_frame_free(&frame);
+  
+  return id3_data;
+}
+
+void ID3_data_free(struct ID3_data **id3_data) {
+  
+  // only free id3_data->data if it exist
+    if ((*id3_data)->data) {
+        free((*id3_data)->data);
+        (*id3_data)->data = NULL;
+    }
+    free(*id3_data);
+    *id3_data = NULL;
 }
