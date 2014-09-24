@@ -69,15 +69,6 @@ int ID3_decode_size(char *size_data) {
 }
 
 
-// TODO: value and reference sementics
-void ID3_decode_size_value_semantics(char *size_data, int size) {
-    size = (0x00000000 | size_data[3] | size_data[2] << 7 | size_data[1] << 14 | size_data[0] << 21);
-}
-
-void ID3_decode_size_reference_semantics(char *size_data, int *size) {
-    *size = (0x00000000 | size_data[3] | size_data[2] << 7 | size_data[1] << 14 | size_data[0] << 21);
-}
-
 struct ID3_header* ID3_read_header(FILE *file) {
 
     // read 10 bytes header from file
@@ -109,6 +100,18 @@ struct ID3_header* ID3_read_header(FILE *file) {
     return header;
 }
 
+
+/*
+// TODO: value and reference sementics
+void ID3_decode_size_value_semantics(char *size_data, int size) {
+    size = (0x00000000 | size_data[3] | size_data[2] << 7 | size_data[1] << 14 | size_data[0] << 21);
+}
+
+void ID3_decode_size_reference_semantics(char *size_data, int *size) {
+    *size = (0x00000000 | size_data[3] | size_data[2] << 7 | size_data[1] << 14 | size_data[0] << 21);
+}
+*/
+
 struct ID3_frame* ID3_read_frame(FILE *file) {
 
     // read 10 bytes frame header
@@ -117,7 +120,7 @@ struct ID3_frame* ID3_read_frame(FILE *file) {
 
     // make sure it's valid
     if (buffer[0] == 0 || buffer[1] == 0 || buffer[2] == 0 || buffer[3] == 0) {
-        printf("No frame found\n");
+        //printf("No frame found\n");
         return NULL;
     }
 
@@ -140,11 +143,26 @@ struct ID3_frame* ID3_read_frame(FILE *file) {
     // decode and store frame size
     frame->size = ID3_decode_size(buffer+4);
 
+//==================================================================================
     // TODO: value semantics and reference semantics
-    //int size = -1;
-    //ID3_decode_size_value_semantics(buffer+4, size);
-    //ID3_decode_size_reference_semantics(buffer+4, &size);
-    //printf("size is %d\n", size);
+/*
+    int size = -1;
+    ID3_decode_size_value_semantics(buffer+4, size);
+    ID3_decode_size_reference_semantics(buffer+4, &size);
+    printf("size is %d\n", size);
+*/
+
+    /*
+    int x = 4;
+    int y = x;
+    x = 10;
+    printf("x = %d y = %d\n", x, y);
+    int a = 4;
+    int *b = &a;
+    a = 10;
+    printf("a = %d b = %d\n", a, *b);
+    */
+//==================================================================================
 
 
     // store frame flags
@@ -288,9 +306,8 @@ struct ID3_data* ID3_read(struct ID3_file *id3_file) {
     id3_data->id[3] = frame->id[3];
     id3_data->id[4] = '\0';
 
+    // TODO: GDB bug
     id3_data->size = frame->size;
-
-    // FIXME: Transfering memory responsibility is bad
     id3_data->data = frame->data;
     frame->data = NULL;
     ID3_frame_free(&frame);
