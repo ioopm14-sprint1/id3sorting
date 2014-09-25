@@ -6,8 +6,12 @@ TARGET = bin/main
 
 main: main.o id3.o io.o id3_helper.o
 	mkdir -p bin
+	mkdir -p bin/music
+	cp data/* bin/data/
 	$(COMPILER) $(LINK_FLAGS) $(TARGET) main.o id3.o io.o id3_helper.o
-	./$(TARGET) data/*9.mp3 data/
+	./$(TARGET) bin/music bin/data/*.mp3
+	echo;
+	tree bin/music
 
 id3.o: source/id3.c source/id3.h
 	$(COMPILER) $(BUILD_FLAGS) source/id3.c
@@ -21,13 +25,15 @@ io.o: source/io.c source/io.h
 id3_helper.o: source/id3_helper.c source/id3_helper.h
 	$(COMPILER) $(BUILD_FLAGS) source/id3_helper.c
 
-clean:
-	rm $(TARGET)
-	rm -f main.o id3.o io.o id3_helper.o
+valgrind: 
+	valgrind --leak-check=yes ./$(TARGET) bin/music bin/data/*.mp3
 
+clean:
+	#rm $(TARGET)
+	rm -f main.o id3.o io.o id3_helper.o
+	rm -rf bin/music/*
 
 tar:
 	tar cfv source.tar source/*
 
-
-#.PHONY: 
+.PHONY: valgrind

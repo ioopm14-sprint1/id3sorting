@@ -206,7 +206,6 @@ void ID3_file_free(ID3_file **id3_file) {
 
 
 ID3_file* ID3_open(const char *filename) {
-
     struct ID3_file *id3_file = ID3_file_new();
 
     if (id3_file == NULL) {
@@ -214,7 +213,6 @@ ID3_file* ID3_open(const char *filename) {
         return NULL;
     }
     //assert(id3_file != NULL);
-
     id3_file->file = fopen(filename, "rb");
 
     if (id3_file->file == NULL) {
