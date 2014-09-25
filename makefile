@@ -23,7 +23,8 @@ id3_helper.o: source/id3_helper.c source/id3_helper.h
 
 clean:
 	rm $(TARGET)
-	rm *.o
+	rm -f main.o id3.o io.o id3_helper.o
+
 
 tar:
 	tar cfv source.tar source/*
