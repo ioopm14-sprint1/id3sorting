@@ -88,7 +88,7 @@ bool test_it_deletes_values() {
     list_append(list, TWO);
     list_append(list, ONE);
 
-    // delete middle element
+    // delete last element
     if (node_data(list_find(list, ONE)) != ONE || list_size(list) != 3) {
         list_destroy(&list);
         return false;
@@ -100,8 +100,7 @@ bool test_it_deletes_values() {
         return false;
     }
 
-
-    //delete first element
+    // delete last element
     if (node_data(list_find(list, TWO)) != TWO || list_size(list) != 2) {
         list_destroy(&list);
         return false;
@@ -113,8 +112,7 @@ bool test_it_deletes_values() {
         return false;
     }
 
-
-    //delete last element
+    // delete last element
     if (node_data(list_find(list, THREE)) != THREE || list_size(list) != 1) {
         list_destroy(&list);
         return false;
