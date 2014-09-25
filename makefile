@@ -7,7 +7,7 @@ TARGET = bin/main
 main: main.o id3.o io.o id3_helper.o
 	mkdir -p bin
 	mkdir -p bin/music
-	cp data/* bin/data/
+	cp -r data/ bin/data/
 	$(COMPILER) $(LINK_FLAGS) $(TARGET) main.o id3.o io.o id3_helper.o
 	./$(TARGET) bin/music bin/data/*.mp3
 	echo;
