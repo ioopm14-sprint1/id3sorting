@@ -4,11 +4,11 @@ LINK_FLAGS = -Wall -ggdb -o
 TARGET = bin/main
 
 
-main: main.o id3.o io.o id3_helper.o
+main: main.o id3.o io.o id3_helper.o id3_sort.o
 	mkdir -p bin
 	mkdir -p bin/music
-	cp -r data/ bin/data/
-	$(COMPILER) $(LINK_FLAGS) $(TARGET) main.o id3.o io.o id3_helper.o
+	cp data/* bin/data/
+	$(COMPILER) $(LINK_FLAGS) $(TARGET) main.o id3.o io.o id3_helper.o id3_sort.o
 	./$(TARGET) bin/music bin/data/*.mp3
 	echo;
 	tree bin/music
@@ -25,7 +25,13 @@ io.o: source/io.c source/io.h
 id3_helper.o: source/id3_helper.c source/id3_helper.h
 	$(COMPILER) $(BUILD_FLAGS) source/id3_helper.c
 
-valgrind: 
+id3_sort.o: source/id3_sort.c source/id3_sort.h
+	$(COMPILER) $(BUILD_FLAGS) source/id3_sort.c
+
+valgrind:
+	mkdir -p bin
+	mkdir -p bin/music
+	cp data/* bin/data/
 	valgrind --leak-check=yes ./$(TARGET) bin/music bin/data/*.mp3
 
 clean:
