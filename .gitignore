@@ -25,3 +25,4 @@
 .DS_Store
 bin/*
 old_code/*
+documentation/*
